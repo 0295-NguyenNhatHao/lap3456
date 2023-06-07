@@ -3,6 +3,8 @@ package nguyennhathao.example.lap3456.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import nguyennhathao.example.lap3456.repository.User;
+import nguyennhathao.example.lap3456.validator.annotation.ValidUserId;
 
 @Entity
 @Table(name = "book")
@@ -63,5 +65,9 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+    @ManyToOne
+    @JoinColumn(name="user_id", referencedColumnName = "id")
+    @ValidUserId
+    private User user;
 }
 

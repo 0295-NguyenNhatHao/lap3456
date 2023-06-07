@@ -1,6 +1,5 @@
 package nguyennhathao.example.lap3456.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,3 +19,5 @@ public class Category {
     @OneToMany(mappedBy = "category",cascade = CascadeType.ALL)
     private List<Book> books;
 }
+
+

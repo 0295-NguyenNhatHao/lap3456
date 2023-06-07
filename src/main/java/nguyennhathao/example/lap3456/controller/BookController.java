@@ -1,17 +1,17 @@
 package nguyennhathao.example.lap3456.controller;
 
 
+import jakarta.validation.Valid;
 import nguyennhathao.example.lap3456.entity.Book;
 import nguyennhathao.example.lap3456.services.BookService;
 import nguyennhathao.example.lap3456.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Controller
@@ -20,7 +20,7 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
-    @Autowired
+    @Autowired(required=false)
     private CategoryService categoryService;
     @GetMapping
     public String showAllBooks(Model model){
@@ -42,7 +42,7 @@ public class BookController {
         return "redirect:/books";
     }
 
-//    @Autowired
+    //    @Autowired
 //    private List<Book> books;
 //
 //    @GetMapping
@@ -64,43 +64,43 @@ public class BookController {
 //        return "redirect:/books";
 //    }
 //
-//   @GetMapping("/edit/{id}")
- //   public String editBookForm(@PathVariable("id") Long id, Model model){
-       //Book editBook = null;
-      // for(Book book : books){
-            //if(book.getId().equals(id)){editBook = book;
-//            }
-//        }
-//        if(editBook != null){
-//            model.addAttribute("book",editBook);
-//            return "book/edit";
-//        }else{
-//            return "not-found";
-//        }
-//    }
-//
-//    @PostMapping("/edit")
-//    public String editBook(@ModelAttribute("book") Book updatedBook){
-//        for(int i = 0; i<books.size();i++){
-//            Book book = books.get(i);
-//            if(book.getId() == updatedBook.getId()){
-//                books.set(i,updatedBook);
-//                break;
-//            }
-//        }
-//        return "redirect:/books";
-//    }
-//
-//    @GetMapping("/delete/{id}")
-//    public String deleteBook(@PathVariable("id") Long id){
-//        Iterator<Book> iterator = books.iterator();
-//        while (iterator.hasNext()){
-//            Book book = iterator.next();
-//            if(book.getId() == id){
-//                iterator.remove();
-//                break;
-//            }
-//        }
-//        return "redirect:/books";
-//    }
+    @GetMapping("/edit/{id}")
+    public String editBookForm(@PathVariable("id") long id, Model model){
+        Book editBook = bookService.getBookById(id);
+        if(editBook != null){
+            model.addAttribute("book", editBook);
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "book/edit";
+        }else {
+            return "not-found";
+        }
+    }
+    @PostMapping("/edit")
+    public String editBook(@Valid @ModelAttribute("book")Book updateBook, BindingResult bindingResult, Model model ){
+        if (bindingResult.hasErrors()){
+            model.addAttribute("categories", categoryService.getAllCategories());
+            return "book/edit";
+        }
+        bookService.getAllBooks().stream()
+                .filter(book -> book.getId() == updateBook.getId())
+                .findFirst()
+                .ifPresent(book -> {
+
+                    bookService.updateBook(updateBook);
+                });
+        return "redirect:/books";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteBook(@PathVariable("id") Long id){
+        Iterator<Book> iterator = bookService.getAllBooks().iterator();
+        while (iterator.hasNext()){
+            Book book = iterator.next();
+            if(book.getId() == id){
+                iterator.remove();
+                bookService.deleteBook(id);
+                break;}
+        }
+        return "redirect:/books";
+    }
 }
